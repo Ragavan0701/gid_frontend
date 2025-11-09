@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import TaskCard from "./TaskCard";
+import Swal from "sweetalert2";
+import api from "../api/todoApi"; // ✅ use Axios instance
 
 export default function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -8,26 +10,16 @@ export default function TaskList() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const token = localStorage.getItem("token"); 
+        const token = localStorage.getItem("token");
         if (!token) {
           console.error("⚠️ No token found — please log in first");
           setLoading(false);
           return;
         }
 
-        const response = await fetch("http://localhost:8080/api/todo", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // ✅ send token
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch tasks");
-        const data = await response.json();
-        
-        setTasks(data);
-        console.log(data);
+        const response = await api.get("/todo"); // ✅ replaced fetch with axios instance
+        setTasks(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       } finally {
@@ -39,7 +31,6 @@ export default function TaskList() {
   }, []);
 
   const completeTask = async (id) => {
-    
     setTasks((prev) =>
       prev.map((task) =>
         task.id === id ? { ...task, status: "Completed" } : task
@@ -49,32 +40,35 @@ export default function TaskList() {
 
   const removeTask = async (id) => {
     try {
-      const confirmed = confirm("Do you want to delete this task?");
-      if (!confirmed) return;
+      const confirmed = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this task?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
 
-      const token = localStorage.getItem("token"); // ✅ get token again
-      if (!token) {
-        alert("Please log in again!");
-        return;
-      }
+      if (!confirmed.isConfirmed) return;
 
-      const response = await fetch(
-        `http://localhost:8080/api/todo/delete?id=${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`, // ✅ send token here too
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to delete task");
+      await api.delete(`api/todo/delete`, { params: { id } }); // ✅ axios delete
 
       setTasks((prev) => prev.filter((task) => task.id !== id));
-      alert("Task deleted successfully!");
+
+      Swal.fire({
+        icon: "success",
+        title: "Task deleted successfully!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.error("Error deleting task:", error);
-      alert("Failed to delete task.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed to delete task.",
+        text: "Something went wrong. Try again.",
+      });
     }
   };
 

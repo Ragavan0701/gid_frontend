@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
+import api from "../api/todoApi"; // ✅ use the configured Axios instance
 
 export default function LoginModal({ onClose, setIsLoggedIn }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,11 +17,8 @@ export default function LoginModal({ onClose, setIsLoggedIn }) {
     setLoading(true);
 
     try {
-      const endpoint = isLogin
-        ? "http://localhost:8080/api/users/login"
-        : "http://localhost:8080/api/users/signup";
-
-      const response = await axios.post(endpoint, formData);
+      const endpoint = isLogin ? "api/users/login" : "api/users/signup";
+      const response = await api.post(endpoint, formData);
 
       console.log("Login Response:", response.data);
 
