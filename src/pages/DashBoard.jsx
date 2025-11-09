@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import StatsCard from "../components/StatsCard";
@@ -22,15 +22,44 @@ export default function DashBoard({ isLoggedin }) {
   const [editingTask, setEditingTask] = useState(null); // ✅ added
 
   const token = localStorage.getItem("token");
+ const fetchTasks = useCallback(async () => {
+  if (!token) {
+    console.warn("🚫 No token found — please log in first");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const response = await fetch("http://localhost:8080/api/todo", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      Swal.fire("Session Expired", "Please log in again.", "warning");
+      localStorage.removeItem("token");
+      window.location.reload();
+      return;
+    }
+
+    if (!response.ok) throw new Error("Failed to fetch tasks");
+
+    const data = await response.json();
+    setTasks(data);
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    Swal.fire("Oops!", "Unable to connect to server. Try again later.", "error");
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
+
 
   useEffect(() => {
-    if (token) {
-      fetchTasks();
-      // const interval = setInterval(() => {
-      //   fetchTasks();
-      // }, 500000);
-    }
-  }, []);
+  if (token) {
+    fetchTasks();
+  }
+}, [token, fetchTasks]);
+
 
   // ✅ update existing task
 const updateTaskInBackend = async (task) => {
@@ -64,36 +93,8 @@ const updateTaskInBackend = async (task) => {
 };
 
 
-  const fetchTasks = async () => {
-    if (!token) {
-      console.warn("🚫 No token found — please log in first");
-      return;
-    }
+ // ✅ dependencies
 
-    try {
-      setLoading(true);
-      const response = await fetch("http://localhost:8080/api/todo", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        Swal.fire("Session Expired", "Please log in again.", "warning");
-        localStorage.removeItem("token");
-        window.location.reload();
-        return;
-      }
-
-      if (!response.ok) throw new Error("Failed to fetch tasks");
-
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      Swal.fire("Oops!", "Unable to connect to server. Try again later.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 

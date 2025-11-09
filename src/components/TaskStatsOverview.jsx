@@ -16,10 +16,11 @@ import "react-circular-progressbar/dist/styles.css";
 export default function TaskStatsOverview({ tasks }) {
   const total = tasks.length;
 
-  // ✅ Derived stats using current date
-  const today = new Date();
+  
 
   const stats = useMemo(() => {
+    // ✅ Derived stats using current date
+    const today = new Date();
     const completed = tasks.filter((t) => t.status === "Completed").length;
     const pending = tasks.filter((t) => t.status === "Pending").length;
     const inProgress = tasks.filter((t) => t.status === "In Progress").length;
@@ -41,7 +42,7 @@ export default function TaskStatsOverview({ tasks }) {
       completionRate: calcPercent(completed),
       calcPercent,
     };
-  }, [today]);
+  }, [tasks,total]);
 
   const overviewStats = [
     {
