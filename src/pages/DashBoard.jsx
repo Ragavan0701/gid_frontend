@@ -18,7 +18,7 @@ export default function DashBoard({ isLoggedin }) {
   const [activities, setActivities] = useState([]);
   const [filterType, setFilterType] = useState("All");
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showAddTask, setShowAddTask] = useState(false);
+  // const [showAddTask, setShowAddTask] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // ✅ added
 
   const token = localStorage.getItem("token");
@@ -26,13 +26,11 @@ export default function DashBoard({ isLoggedin }) {
   useEffect(() => {
     if (token) {
       fetchTasks();
-      const interval = setInterval(() => {
-        fetchTasks();
-      }, 500000);
-
-      return () => clearInterval(interval);
+      // const interval = setInterval(() => {
+      //   fetchTasks();
+      // }, 500000);
     }
-  }, [token]);
+  }, []);
 
   // ✅ update existing task
 const updateTaskInBackend = async (task) => {
@@ -183,7 +181,7 @@ const updateTaskInBackend = async (task) => {
 
       Swal.fire("Success!", "Task added successfully!", "success");
       await fetchTasks();
-      setShowAddTask(false);
+      // setShowAddTask(false);
       setActivities((prev) => [`🆕 Added task: "${task.title}"`, ...prev]);
     } catch (error) {
       console.error("Error adding task:", error);

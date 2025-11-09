@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   CircularProgressbar,
   buildStyles,
@@ -41,7 +41,7 @@ export default function TaskStatsOverview({ tasks }) {
       completionRate: calcPercent(completed),
       calcPercent,
     };
-  }, [tasks, total]);
+  }, [today]);
 
   const overviewStats = [
     {

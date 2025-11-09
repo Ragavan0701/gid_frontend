@@ -6,7 +6,6 @@ export default function Navbar({ onMenuClick, onSearchChange }) {
   const [darkMode, setDarkMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const toggleTheme = () => setDarkMode(!darkMode);
 
   const handleSearch = (e) => {
     const value = e.target.value;
